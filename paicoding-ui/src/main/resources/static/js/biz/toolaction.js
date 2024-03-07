@@ -13,9 +13,11 @@ const praiseArticle = function (articleId, action, callback) {
 }
 
 // 评论点赞
-const praiseComment = function (e,login) {
+const praiseComment = function (e, login) {
     console.log("this:===>", e);
-    if (!login) {return;}
+    if (!login) {
+        return;
+    }
 
     const commentId = e.dataset.commentId;
     const action = e.dataset.praised == 'true' ? false : true
@@ -23,7 +25,7 @@ const praiseComment = function (e,login) {
 
     // 2 点赞， 4 取消点赞
     const type = action ? 2 : 4;
-    console.log("action=", action , "-->", e.dataset)
+    console.log("action=", action, "-->", e.dataset)
     $.get('/comment/api/favor?commentId=' + commentId + "&type=" + type, function (data) {
         console.log("response:", data);
         if (!data || !data.status || data.status.code !== 0) {
@@ -31,7 +33,7 @@ const praiseComment = function (e,login) {
         }
 
         let priaseCount = e.dataset.praiseCount;
-        if(type == 2) {
+        if (type == 2) {
             e.classList.add('active');
             priaseCount += 1;
         } else {

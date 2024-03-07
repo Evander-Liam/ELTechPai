@@ -190,7 +190,7 @@
     position: relative;
     flex: 0 0 auto;
     align-items: center;
-    background: linear-gradient(90deg,rgba(246,66,66,.25),rgba(246,66,66,0));
+    background: linear-gradient(90deg, rgba(246, 66, 66, .25), rgba(246, 66, 66, 0));
     border-radius: 100px;
     padding: 0 48px 0 8px;
     color: var(--pai-brand-6-mq);

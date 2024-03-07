@@ -33,7 +33,7 @@ $('#mockLogin').click(function () {
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            console.log("Error: " +textStatus + ", " + errorThrown);
+            console.log("Error: " + textStatus + ", " + errorThrown);
             toastr.error(data);
         }
     });
@@ -55,7 +55,7 @@ $('#mockLogin2').click(function () {
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            console.log("Error: " +textStatus + ", " + errorThrown);
+            console.log("Error: " + textStatus + ", " + errorThrown);
             toastr.error(data);
         }
     });

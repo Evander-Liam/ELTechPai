@@ -5,9 +5,10 @@
  * Updated: 2020-10-10 17:40:04
 **/
 ;
-let articleCatalog = (function() {
-    if ( !document.getElementById('postAr') || document.querySelectorAll('.headerlink').length === 0 || window.innerWidth < 900 ) {
-        return function(){};
+let articleCatalog = (function () {
+    if (!document.getElementById('postAr') || document.querySelectorAll('.headerlink').length === 0 || window.innerWidth < 900) {
+        return function () {
+        };
     }
     let DEFAULT = {
         lineHeight: 28,           // 每个菜单的行高是 28
@@ -18,7 +19,7 @@ let articleCatalog = (function() {
         toTopDistance: 80,        // 距离视口顶部多少高度之内时候触发高亮
         selector: '.headerlink',  // 文章内容中标题标签的 selector
     }
-    return function(args) {
+    return function (args) {
         DEFAULT = Object.assign(DEFAULT, args)
 
         let arContentAnchor = document.querySelectorAll(DEFAULT.selector),
@@ -41,18 +42,18 @@ let articleCatalog = (function() {
 
         initCatalog()
 
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             debounce(setHighlight, DEFAULT.delay)()
             debounce(resetStatus, DEFAULT.delay)()
         }, false)
 
         if (catalogLength > maxCatalogCount) {
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 debounce(scrollCatalog, DEFAULT.delay)()
             }, false)
         }
 
-        window.addEventListener('resize', function(e) {
+        window.addEventListener('resize', function (e) {
             debounce(initCatalog, DEFAULT.delay)()
         }, false)
 
@@ -75,11 +76,11 @@ let articleCatalog = (function() {
                 initBodyTop = bodyBCR.top
                 initDlBottom = initDlBottom || catalogDl.getBoundingClientRect().bottom
                 firstDdTop = firstDdTop || catalogDd[0].getBoundingClientRect().top,
-                    bodyMidBottom = initBodyTop + Math.ceil((maxCatalogCount / 2 )) * DEFAULT.lineHeight
+                    bodyMidBottom = initBodyTop + Math.ceil((maxCatalogCount / 2)) * DEFAULT.lineHeight
 
                 // 给目录子项绑定事件
                 catalogDd.forEach((curr, index) => {
-                    curr.addEventListener('click', function(e) {
+                    curr.addEventListener('click', function (e) {
                         e.preventDefault()
                         hasStopSetHighlight = true
                         document.querySelector('.arCatalog .on').classList.remove('on')
@@ -94,17 +95,17 @@ let articleCatalog = (function() {
 
         // 防抖：触发高频事件 n 秒后只会执行一次，如果 n 秒内事件再次触发，则会重新计时。
         function debounce(fn, delay = 200) {
-            return function(args) {
+            return function (args) {
                 const _this = this
                 clearTimeout(fn.id)
-                fn.id = setTimeout(function() {
+                fn.id = setTimeout(function () {
                     fn.apply(_this, args)
                 }, delay)
             }
         }
 
         // 生成目录
-        function generateCatalog(){
+        function generateCatalog() {
             let catalogHeight = arContentAnchor.length > maxCatalogCount ? maxCatalogCount * DEFAULT.lineHeight : arContentAnchor.length * DEFAULT.lineHeight;
             let retStr = `
 						<div class="arCatalog">
@@ -119,7 +120,7 @@ let articleCatalog = (function() {
 
             for (let currNode of arContentAnchor) {
                 tagName = currNode.parentElement.tagName
-                if ( tagName === 'H2') {
+                if (tagName === 'H2') {
                     acIndex = ++h2Index
                     h3Index = 1
                     className = 'arCatalog-tack1'
@@ -136,7 +137,8 @@ let articleCatalog = (function() {
 							<a href="#">${currNode.title}</a>
 							<span class="arCatalog-dot"></span>
 						</dd>`
-            };
+            }
+            ;
             retStr += `</dl></div></div>`
 
             document.getElementById('arAnchorBar').innerHTML = retStr
@@ -153,7 +155,7 @@ let articleCatalog = (function() {
                 if (curr.bottom + (maxCatalogCount / 2) * DEFAULT.lineHeight <= bodyBCR.bottom) {  // 上半部分
                     // 不滚动
                 } else if (curr.bottom - bodyMidBottom < list.bottom - bodyBCR.bottom) {  // 中位以下
-                    marginTop += -Math.floor((curr.bottom - bodyMidBottom ) / DEFAULT.lineHeight) * DEFAULT.lineHeight
+                    marginTop += -Math.floor((curr.bottom - bodyMidBottom) / DEFAULT.lineHeight) * DEFAULT.lineHeight
                 } else if (bodyBCR.bottom <= list.bottom) {  // 当剩余滚动距离
                     marginTop = bodyBCR.bottom - initDlBottom
                 }
@@ -173,6 +175,7 @@ let articleCatalog = (function() {
         function scrollToDest(destScrollTop) {
             let startTime;
             let currScrollTop = window.pageYOffset;
+
             function step(timestamp) {
                 if (!startTime) {
                     startTime = timestamp
@@ -186,11 +189,12 @@ let articleCatalog = (function() {
                     window.requestAnimationFrame(step)
                 }
             }
+
             window.requestAnimationFrame(step)
         }
 
         // 高亮当前目录s
-        function setHighlight(){
+        function setHighlight() {
             defaultDirec = getScrollDirection()
 
             if (hasStopSetHighlight) {
@@ -218,7 +222,7 @@ let articleCatalog = (function() {
                 if (defaultDirec === 'bottom') {
                     while (nextOnIndex < catalogLength) {
                         let currTop = arContentAnchor[nextOnIndex].getBoundingClientRect().top
-                        if ( currTop > DEFAULT.toTopDistance && nextOnIndex > 0){
+                        if (currTop > DEFAULT.toTopDistance && nextOnIndex > 0) {
                             nextOnIndex--
                             break
                         }
@@ -227,7 +231,7 @@ let articleCatalog = (function() {
                 } else {
                     while (nextOnIndex >= 0) {
                         let currTop = arContentAnchor[nextOnIndex].getBoundingClientRect().top
-                        if ( currTop <= DEFAULT.toTopDistance){
+                        if (currTop <= DEFAULT.toTopDistance) {
                             break
                         }
                         nextOnIndex--

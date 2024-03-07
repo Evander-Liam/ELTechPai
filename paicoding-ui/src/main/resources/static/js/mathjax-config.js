@@ -16,10 +16,10 @@ const katexRender = function (tex, delimiter) {
         ],
 
         // • rendering keys, e.g.:
-        throwOnError : false
+        throwOnError: false
     });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     katexRender();
 });
