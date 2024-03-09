@@ -1,8 +1,8 @@
 package com.github.paicoding.forum.service.user.service.help;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -15,14 +15,11 @@ import java.util.Objects;
  */
 @Component
 public class UserPwdEncoder {
-    /**
-     * 密码加盐，更推荐的做法是每个用户都使用独立的盐，提高安全性
-     */
-    @Value("${security.salt}")
-    private String salt;
-
     @Value("${security.salt-index}")
     private Integer saltIndex;
+
+    @Value("${security.pepper}")
+    private String PEPPER;
 
     public boolean match(String plainPwd, String encPwd) {
         return Objects.equals(encPwd(plainPwd), encPwd);
@@ -35,12 +32,13 @@ public class UserPwdEncoder {
      * @return
      */
     public String encPwd(String plainPwd) {
+        String salt = DigestUtils.sha256Hex(plainPwd.getBytes(StandardCharsets.UTF_8));
         if (plainPwd.length() > saltIndex) {
-            plainPwd = plainPwd.substring(0, saltIndex) + salt + plainPwd.substring(saltIndex);
+            plainPwd = plainPwd.substring(0, saltIndex) + salt + plainPwd.substring(saltIndex) + PEPPER;
         } else {
-            plainPwd = plainPwd + salt;
+            plainPwd = plainPwd + salt + PEPPER;
         }
-        return DigestUtils.md5DigestAsHex(plainPwd.getBytes(StandardCharsets.UTF_8));
-    }
 
+        return DigestUtils.sha256Hex(plainPwd.getBytes(StandardCharsets.UTF_8));
+    }
 }

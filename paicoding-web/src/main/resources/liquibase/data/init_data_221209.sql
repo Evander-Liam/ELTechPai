@@ -162,7 +162,7 @@ insert into config(`type`,`name`,`banner_url`,`jump_url`,`content`,`rank`, `stat
 
 INSERT INTO `user`
 (id, third_account_id, `user_name`, `password`, login_type, deleted)
-VALUES(1, 'a7cb7228-0f85-4dd5-845c-7c5df3746e92', 'admin', 'df3a4143b663a086d1c006c8084db1b1', 0, 0);
+VALUES(1, 'a7cb7228-0f85-4dd5-845c-7c5df3746e92', 'admin', '6a49919eb225ab538ecda7ea5aa500a52f60334208f6e8a4770b55aa7785cabd', 0, 0);
 
 INSERT INTO user_info
 (id, user_id, user_name, photo, `position`, company, profile, extend, deleted)
