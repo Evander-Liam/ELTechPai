@@ -1,5 +1,6 @@
 package com.github.paicoding.forum.core.util;
 
+import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
@@ -15,9 +16,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
+    @Getter
     private volatile static ApplicationContext context;
     private volatile static Environment environment;
 
+    @Getter
     private static Binder binder;
 
     @Override
@@ -29,10 +32,6 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
     public void setEnvironment(Environment environment) {
         SpringUtil.environment = environment;
         binder = Binder.get(environment);
-    }
-
-    public static ApplicationContext getContext() {
-        return context;
     }
 
     /**
@@ -102,15 +101,5 @@ public class SpringUtil implements ApplicationContextAware, EnvironmentAware {
      */
     public static void publishEvent(ApplicationEvent event) {
         context.publishEvent(event);
-    }
-
-
-    /**
-     * 配置绑定类
-     *
-     * @return
-     */
-    public static Binder getBinder() {
-        return binder;
     }
 }

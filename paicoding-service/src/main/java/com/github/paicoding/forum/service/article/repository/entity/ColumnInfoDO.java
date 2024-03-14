@@ -45,7 +45,10 @@ public class ColumnInfoDO extends BaseDO {
      * @see ColumnStatusEnum#getCode()
      */
     private Integer state;
-
+    /**
+     * 删除与否
+     */
+    private Integer deleted;
     /**
      * 排序
      */

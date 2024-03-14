@@ -41,6 +41,7 @@
             left join article as a on c.article_id = a.id
             left join column_info as col on c.column_id = col.id
         where a.deleted = ${@com.github.paicoding.forum.api.model.enums.YesOrNoEnum@NO.code}
+                and col.deleted = ${@com.github.paicoding.forum.api.model.enums.YesOrNoEnum@NO.code}
             <if test="columnId != null and columnId != -1">
                 and c.column_id = #{columnId}
             </if>
@@ -57,6 +58,7 @@
             left join article as a on c.article_id = a.id
             left join column_info as col on c.column_id = col.id
         where a.deleted = ${@com.github.paicoding.forum.api.model.enums.YesOrNoEnum@NO.code}
+                and col.deleted = ${@com.github.paicoding.forum.api.model.enums.YesOrNoEnum@NO.code}
             <if test="columnId != null and columnId != -1">
                 and c.column_id = #{columnId}
             </if>
