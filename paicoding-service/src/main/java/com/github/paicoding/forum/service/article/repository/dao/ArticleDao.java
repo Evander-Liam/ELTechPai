@@ -33,6 +33,7 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 文章相关DB操作
@@ -311,12 +312,9 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
         }
 
         List<Long> ids = list.stream().map(ReadCountDO::getDocumentId).collect(Collectors.toList());
+        Map<Long, Integer> idToIndex = IntStream.range(0, ids.size()).boxed().collect(Collectors.toMap(ids::get, i -> i));
         List<ArticleDO> result = baseMapper.selectBatchIds(ids);
-        result.sort((o1, o2) -> {
-            int i1 = ids.indexOf(o1.getId());
-            int i2 = ids.indexOf(o2.getId());
-            return Integer.compare(i1, i2);
-        });
+        result.sort(Comparator.comparingInt(o -> idToIndex.get(o.getId())));
         return result;
     }
 
