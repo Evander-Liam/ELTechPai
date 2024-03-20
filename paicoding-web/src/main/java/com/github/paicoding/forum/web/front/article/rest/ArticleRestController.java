@@ -88,7 +88,7 @@ public class ArticleRestController {
     }
 
     /**
-     * 查询所有的标签
+     * 查询文章概要
      *
      * @return
      */

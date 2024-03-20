@@ -70,6 +70,8 @@ public class RabbitmqServiceImpl implements RabbitmqService {
             Connection connection = rabbitmqConnection.getConnection();
             //创建消息信道
             final Channel channel = connection.createChannel();
+            //创建交换机
+            channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, true, false, null);
             //消息队列
             channel.queueDeclare(queueName, true, false, false, null);
             //绑定队列到交换机
@@ -91,9 +93,9 @@ public class RabbitmqServiceImpl implements RabbitmqService {
             };
             // 取消自动ack
             channel.basicConsume(queueName, false, consumer);
-            channel.close();
+            // channel.close();
             RabbitmqConnectionPool.returnConnection(rabbitmqConnection);
-        } catch (InterruptedException | IOException | TimeoutException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -117,7 +119,7 @@ public class RabbitmqServiceImpl implements RabbitmqService {
                     step = 0;
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }

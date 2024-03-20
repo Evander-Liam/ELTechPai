@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executor;
  * @date 2023/6/9
  */
 @Configuration
-@ConditionalOnProperty(value = "rabbitmq.switchFlag")
+@ConditionalOnProperty(value = "rabbitmq.switchFlag", havingValue = "true")
 @EnableConfigurationProperties(RabbitmqProperties.class)
 public class RabbitMqAutoConfig implements ApplicationRunner {
     @Resource
@@ -28,7 +29,6 @@ public class RabbitMqAutoConfig implements ApplicationRunner {
 
     @Autowired
     private RabbitmqProperties rabbitmqProperties;
-
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

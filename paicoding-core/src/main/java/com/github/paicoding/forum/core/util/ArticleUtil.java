@@ -23,7 +23,7 @@ public class ArticleUtil {
             return StringUtils.EMPTY;
         }
 
-        // 首先移除所有的图片，链接
+        // 截取内容在字数限制之内
         summary = summary.substring(0, Math.min(summary.length(), MAX_SUMMARY_CHECK_TXT_LEN)).trim();
         // 移除md的图片、超链
         summary = summary.replaceAll(LINK_IMG_PATTERN.pattern(), "");
