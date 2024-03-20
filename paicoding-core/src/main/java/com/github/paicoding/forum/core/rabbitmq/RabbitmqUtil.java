@@ -1,82 +1,43 @@
 package com.github.paicoding.forum.core.rabbitmq;
 
-import com.rabbitmq.client.ConnectionFactory;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.BuiltinExchangeType;
+import org.springframework.amqp.core.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * 说明：添加rabbitmq连接池后，这个就可以废弃掉
- * @author Louzai
- * @date 2023/5/10
+ * <p>date: 2024/03/20 16:49 </p>
+ * <p>description:  </p>
+ *
+ * @author Liam
  */
+@Service
 public class RabbitmqUtil {
+    @Autowired
+    private AmqpAdmin amqpAdmin;
 
-    /**
-     * 每个 host 都有自己的工厂，便于后面改造成多机的方式
-     */
-    private static Map<String, ConnectionFactory> executors = new ConcurrentHashMap<>();
-
-    /**
-     * 初始化一个工厂
-     *
-     * @param host
-     * @param port
-     * @param username
-     * @param passport
-     * @param virtualhost
-     * @return
-     */
-    private static ConnectionFactory init(String host,
-                                  Integer port,
-                                  String username,
-                                  String passport,
-                                  String virtualhost) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setPort(port);
-        factory.setUsername(username);
-        factory.setPassword(passport);
-        factory.setVirtualHost(virtualhost);
-        return factory;
-    }
-
-    /**
-     * 工厂单例，每个host都有属于自己的工厂
-     *
-     * @param host
-     * @param port
-     * @param username
-     * @param passport
-     * @param virtualhost
-     * @return
-     */
-    public static ConnectionFactory getOrInitConnectionFactory(String host,
-                                                               Integer port,
-                                                               String username,
-                                                               String passport,
-                                                               String virtualhost) {
-        String key = getConnectionFactoryKey(host, port);
-        ConnectionFactory connectionFactory = executors.get(key);
-        if (null == connectionFactory) {
-            synchronized (RabbitmqUtil.class) {
-                connectionFactory = executors.get(key);
-                if (null == connectionFactory) {
-                    connectionFactory = init(host, port, username, passport, virtualhost);
-                    executors.put(key, connectionFactory);
-                }
-            }
+    public Exchange declareExchange(String exchange, BuiltinExchangeType exchangeType) {
+        Exchange durableExchange;
+        switch (exchangeType) {
+            case DIRECT:
+                durableExchange = new DirectExchange(exchange);
+                break;
+            case TOPIC:
+                durableExchange = new TopicExchange(exchange);
+                break;
+            case FANOUT:
+                durableExchange = new FanoutExchange(exchange);
+                break;
+            case HEADERS:
+                durableExchange = new HeadersExchange(exchange);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported exchange type: " + exchangeType);
         }
-        return connectionFactory;
-    }
 
-    /**
-     * 获取key
-     * @param host
-     * @param port
-     * @return
-     */
-    private static String getConnectionFactoryKey(String host, Integer port) {
-        return host + ":" + port;
+        // 声明交换器
+        amqpAdmin.declareExchange(durableExchange);
+        return durableExchange;
     }
 }

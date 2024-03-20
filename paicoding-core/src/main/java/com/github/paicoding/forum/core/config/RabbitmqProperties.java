@@ -34,7 +34,7 @@ public class RabbitmqProperties {
     /**
      * 密码
      */
-    private String passport;
+    private String password;
 
     /**
      * 路径

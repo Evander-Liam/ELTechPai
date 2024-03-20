@@ -1,6 +1,9 @@
 package com.github.paicoding.forum.service.notify.service;
 
 import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +31,16 @@ public interface RabbitmqService {
                     String toutingKey,
                     String message) throws IOException, TimeoutException;
 
+    /**
+     * 消费指定信息
+     *
+     * @param body
+     * @param deliveryTag
+     * @param channel
+     */
+    void consumerMsg4Ori(byte[] body,
+                         @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
+                         Channel channel);
 
     /**
      * 消费消息
@@ -38,10 +51,9 @@ public interface RabbitmqService {
      * @throws IOException
      * @throws TimeoutException
      */
+    /*
     void consumerMsg(String exchange,
                      String queue,
                      String routingKey) throws IOException, TimeoutException;
-
-
-    void processConsumerMsg();
+    */
 }

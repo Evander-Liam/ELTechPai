@@ -16,9 +16,9 @@ public class CommonConstants {
     /**
      * 消息队列
      */
-    public static String EXCHANGE_NAME_DIRECT = "direct.exchange";
-    public static String QUERE_KEY_PRAISE = "praise";
-    public static String QUERE_NAME_PRAISE = "quere.praise";
+    public static final String EXCHANGE_NAME_DIRECT = "direct.exchange";
+    public static final String QUERE_KEY_PRAISE = "praise";
+    public static final String QUERE_NAME_PRAISE = "quere.praise";
 
     /**
      * 分类类型

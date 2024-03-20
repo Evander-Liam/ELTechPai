@@ -39,3 +39,4 @@ pid.log
 *.jar
 *.jar.bak
 *.jar.tmp
+/test/
