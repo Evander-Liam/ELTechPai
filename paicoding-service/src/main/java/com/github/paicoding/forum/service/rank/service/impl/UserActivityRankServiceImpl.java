@@ -160,10 +160,9 @@ public class UserActivityRankServiceImpl implements UserActivityRankService {
         Map<Long, Integer> userScoreMap = rankList.stream().collect(Collectors.toMap(s -> Long.valueOf(s.getLeft()), s -> s.getRight().intValue()));
         List<SimpleUserInfoDTO> users = userService.batchQuerySimpleUserInfo(userScoreMap.keySet());
 
-        // 3. 根据评分进行排序
+        // 3. 根据评分进行排序（默认已排序）
         List<RankItemDTO> rank = users.stream()
                 .map(user -> new RankItemDTO().setUser(user).setScore(userScoreMap.getOrDefault(user.getUserId(), 0)))
-                .sorted((o1, o2) -> Integer.compare(o2.getScore(), o1.getScore()))
                 .collect(Collectors.toList());
 
         // 4. 补齐每个用户的排名

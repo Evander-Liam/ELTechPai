@@ -357,17 +357,14 @@ public class RedisClient {
      * @return
      */
     public static List<ImmutablePair<String, Double>> zTopNScore(String key, int n) {
-        return template.execute(new RedisCallback<List<ImmutablePair<String, Double>>>() {
-            @Override
-            public List<ImmutablePair<String, Double>> doInRedis(RedisConnection connection) throws DataAccessException {
-                Set<RedisZSetCommands.Tuple> set = connection.zRangeWithScores(keyBytes(key), -n, -1);
-                if (set == null) {
-                    return Collections.emptyList();
-                }
-                return set.stream()
-                        .map(tuple -> ImmutablePair.of(toObj(tuple.getValue(), String.class), tuple.getScore()))
-                        .sorted((o1, o2) -> Double.compare(o2.getRight(), o1.getRight())).collect(Collectors.toList());
+        return template.execute((RedisCallback<List<ImmutablePair<String, Double>>>) connection -> {
+            Set<RedisZSetCommands.Tuple> set = connection.zRevRangeWithScores(keyBytes(key), 0, n - 1);
+            if (set == null) {
+                return Collections.emptyList();
             }
+            return set.stream()
+                    .map(tuple -> ImmutablePair.of(toObj(tuple.getValue(), String.class), tuple.getScore()))
+                    .sorted((o1, o2) -> Double.compare(o2.getRight(), o1.getRight())).collect(Collectors.toList());
         });
     }
 
