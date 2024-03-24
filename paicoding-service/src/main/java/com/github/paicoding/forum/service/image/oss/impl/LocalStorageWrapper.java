@@ -42,20 +42,10 @@ public class LocalStorageWrapper implements ImageUploader {
         // 记录耗时分布
         StopWatchUtil stopWatchUtil = StopWatchUtil.init("图片上传");
         try {
-            if (fileType == null) {
-                // 根据魔数判断文件类型
-                InputStream finalInput = input;
-                byte[] bytes = stopWatchUtil.record("流转字节", () -> StreamUtils.copyToByteArray(finalInput));
-                input = new ByteArrayInputStream(bytes);
-                fileType = getFileType((ByteArrayInputStream) input, fileType);
-            }
-
             String path = imageProperties.getAbsTmpPath() + imageProperties.getWebImgPath();
             String fileName = genTmpFileName();
 
-            InputStream finalInput = input;
-            String finalFileType = fileType;
-            FileWriteUtil.FileInfo file = stopWatchUtil.record("存储", () -> FileWriteUtil.saveFileByStream(finalInput, path, fileName, finalFileType));
+            FileWriteUtil.FileInfo file = stopWatchUtil.record("存储", () -> FileWriteUtil.saveFileByStream(input, path, fileName, fileType));
             return imageProperties.buildImgUrl(imageProperties.getWebImgPath() + file.getFilename() + "." + file.getFileType());
         } catch (Exception e) {
             log.error("Parse img from httpRequest to BufferedImage error! e:", e);

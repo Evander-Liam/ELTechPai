@@ -2,9 +2,12 @@ package com.github.paicoding.forum.service.image.oss;
 
 import com.github.hui.quick.plugin.base.constants.MediaType;
 import com.github.hui.quick.plugin.base.file.FileReadUtil;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,21 +39,28 @@ public interface ImageUploader {
     boolean uploadIgnore(String fileUrl);
 
     /**
-     * 获取文件类型
+     * 根据魔数获取图片文件类型
      *
      * @param input
      * @param fileType
      * @return
      */
-    default String getFileType(ByteArrayInputStream input, String fileType) {
+    default String getFileType(InputStream input, String fileType) throws IOException {
         if (StringUtils.isNotBlank(fileType)) {
             return fileType;
         }
 
-        MediaType type = MediaType.typeOfMagicNum(FileReadUtil.getMagicNum(input));
+        if (!(input instanceof ByteInputStream)) {
+            byte[] bytes = StreamUtils.copyToByteArray(input);
+            input = new ByteArrayInputStream(bytes);
+        }
+
+        // 根据魔数判断文件类型
+        MediaType type = MediaType.typeOfMagicNum(FileReadUtil.getMagicNum((ByteArrayInputStream) input));
         if (STATIC_IMG_TYPE.contains(type)) {
             return type.getExt();
         }
-        return DEFAULT_FILE_TYPE;
+
+        return null;
     }
 }

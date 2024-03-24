@@ -74,13 +74,14 @@ public class ImageServiceImpl implements ImageService {
             throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "缺少需要上传的图片");
         }
 
-        // 目前只支持 jpg, png, webp 等静态图片格式
-        String fileType = validateStaticImg(file.getContentType());
-        if (fileType == null) {
-            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "图片只支持png,jpg,gif");
-        }
-
         try {
+            // 目前只支持 jpg, png, webp 等静态图片格式
+            String fileType = validateStaticImg(file.getContentType());
+            fileType = imageUploader.getFileType(file.getInputStream(), fileType);
+            if (fileType == null) {
+                throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "图片只支持png,jpg,gif");
+            }
+
             return imageUploader.upload(file.getInputStream(), fileType);
         } catch (IOException e) {
             log.error("Parse img from httpRequest to BufferedImage error! e:", e);
@@ -165,10 +166,7 @@ public class ImageServiceImpl implements ImageService {
      * @return
      */
     private String validateStaticImg(String mime) {
-        if ("svg".equalsIgnoreCase(mime)) {
-            // fixme 上传文件保存到服务器本地时，做好安全保护, 避免上传了要给攻击性的脚本
-            return "svg";
-        }
+        // fixme 上传的SVG文件可能包含恶意的脚本代码，因此在保存到服务器之前，需要进行适当的安全检查和处理，这里选择不上传。
 
         if (mime.contains(MediaType.ImageJpg.getExt())) {
             mime = mime.replace("jpg", "jpeg");
