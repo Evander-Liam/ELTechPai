@@ -38,7 +38,7 @@ public class SnowflakeProducer {
             while (true) {
                 try {
                     queue.offer(generator.nextId(), 1, TimeUnit.MINUTES);
-                } catch (InterruptedException e1) {
+                } catch (InterruptedException ignored) {
                 } catch (Exception e) {
                     log.info("gen id error! {}", e.getMessage());
                 }

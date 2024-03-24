@@ -61,8 +61,7 @@ public class PaiSnowflakeIdGenerator implements IdGenerator {
             this.dataCenter = Integer.parseInt(cells[0]) & ((1 << DATA_CENTER_BITS) - 1);
             this.workId = Integer.parseInt(cells[3]) >> 16 & ((1 << WORKER_ID_BITS) - 1);
         } catch (Exception e) {
-            this.dataCenter = 1;
-            this.workId = 1;
+            e.printStackTrace();
         }
     }
 

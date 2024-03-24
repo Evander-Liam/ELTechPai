@@ -105,7 +105,7 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
      * @return
      */
     private Long insertArticle(ArticleDO article, String content, Set<Long> tags) {
-        // article + article_detail + tag  三张表的数据变更
+        // 这里涉及article、article_detail、article_tag、user_foot四张表的数据变更
         if (needToReview(article)) {
             // 非白名单中的作者发布文章需要进行审核
             article.setStatus(PushStatusEnum.REVIEW.getCode());
