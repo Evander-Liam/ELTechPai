@@ -1,5 +1,7 @@
 package com.github.paicoding.forum.web.common.image.rest;
 
+import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
+import com.github.paicoding.forum.api.model.exception.ForumException;
 import com.github.paicoding.forum.api.model.vo.ResVo;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.core.permission.Permission;
@@ -42,6 +44,9 @@ public class ImageRestController {
         try {
             String imagePath = imageService.saveImg(request);
             imageVo.setImagePath(imagePath);
+        } catch (ForumException fe) {
+            log.error("Image's rejected with auditing!");
+            return ResVo.fail(StatusEnum.UPLOAD_PIC_FAILED_IN_AUDITING);
         } catch (Exception e) {
             log.error("save upload file error!", e);
             return ResVo.fail(StatusEnum.UPLOAD_PIC_FAILED);

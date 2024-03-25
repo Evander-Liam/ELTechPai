@@ -46,6 +46,7 @@ public enum StatusEnum {
 
     // 图片相关异常类型
     UPLOAD_PIC_FAILED(100_500_002, "图片上传失败！"),
+    UPLOAD_PIC_FAILED_IN_AUDITING(100_500_003, "图片内容违规！"),
 
     // --------------------------------
 

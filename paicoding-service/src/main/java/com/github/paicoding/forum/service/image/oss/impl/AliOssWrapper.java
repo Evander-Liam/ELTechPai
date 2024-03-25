@@ -5,10 +5,14 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
+import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
+import com.github.paicoding.forum.api.model.exception.ForumException;
+import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.core.autoconf.DynamicConfigContainer;
 import com.github.paicoding.forum.core.config.ImageProperties;
 import com.github.paicoding.forum.core.util.Md5Util;
 import com.github.paicoding.forum.core.util.StopWatchUtil;
+import com.github.paicoding.forum.service.image.oss.ImageAudit;
 import com.github.paicoding.forum.service.image.oss.ImageUploader;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,6 +53,9 @@ public class AliOssWrapper implements ImageUploader, InitializingBean, Disposabl
             // 创建PutObjectRequest对象。
             byte[] bytes = StreamUtils.copyToByteArray(input);
             return upload(bytes, fileType);
+        } catch (ForumException fe) {
+            log.error("Image's rejected with auditing!");
+            throw fe;
         } catch (OSSException oe) {
             log.error("Oss rejected with an error response! msg:{}, code:{}, reqId:{}, host:{}", oe.getErrorMessage(), oe.getErrorCode(), oe.getRequestId(), oe.getHostId());
             return "";
@@ -64,9 +71,9 @@ public class AliOssWrapper implements ImageUploader, InitializingBean, Disposabl
         StopWatchUtil stopWatchUtil = StopWatchUtil.init("图片上传");
         try {
             // 计算md5作为文件名，避免重复上传
-            String fileName = stopWatchUtil.record("md5计算", () -> Md5Util.encode(bytes));
+            String tempFileName = stopWatchUtil.record("md5计算", () -> Md5Util.encode(bytes));
             ByteArrayInputStream input = new ByteArrayInputStream(bytes);
-            fileName = properties.getOss().getPrefix() + fileName + "." + getFileType(input, fileType);
+            String fileName = properties.getOss().getPrefix() + tempFileName + "." + getFileType(input, fileType);
             // 创建PutObjectRequest对象。
             PutObjectRequest putObjectRequest = new PutObjectRequest(properties.getOss().getBucket(), fileName, input);
             // 设置该属性可以返回response。如果不设置，则返回的response为空。
@@ -75,20 +82,40 @@ public class AliOssWrapper implements ImageUploader, InitializingBean, Disposabl
             // 上传文件
             PutObjectResult result = stopWatchUtil.record("文件上传", () -> ossClient.putObject(putObjectRequest));
             if (SUCCESS_CODE == result.getResponse().getStatusCode()) {
-                return properties.getOss().getHost() + fileName;
+                StringBuilder imageURL = new StringBuilder("https://");
+                imageURL.append(properties.getOss().getBucket())
+                        .append('.')
+                        .append(properties.getOss().getEndpoint())
+                        .append('/')
+                        .append(fileName);
+
+                String errorMsg = stopWatchUtil.record("检测违规图片", () -> ImageAudit.scanImage(imageURL.toString()));
+                if (StringUtils.isNotBlank(errorMsg)) {
+                    stopWatchUtil.record("删除违规图片", () -> ossClient.deleteObject(properties.getOss().getBucket(), fileName));
+
+                    ForumException forumException = ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED);
+                    forumException.getStatus().setMsg(errorMsg);
+                    throw forumException;
+                }
+
+                return imageURL.toString();
+                // return properties.getOss().getHost() + fileName;
             } else {
                 log.error("upload to oss error! response:{}", result.getResponse().getStatusCode());
                 // Guava 不允许回传 null
                 return "";
             }
+        } catch (ForumException fe) {
+            log.error("Image's rejected with auditing! msg: {}", fe.getStatus().getMsg());
+            throw fe;
         } catch (OSSException oe) {
             log.error("Oss rejected with an error response! msg:{}, code:{}, reqId:{}, host:{}", oe.getErrorMessage(), oe.getErrorCode(), oe.getRequestId(), oe.getHostId());
-            return  "";
+            return "";
         } catch (Exception ce) {
             log.error("Caught an ClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network. {}", ce.getMessage());
-            return  "";
+            return "";
         } finally {
             if (log.isDebugEnabled()) {
                 log.debug("upload image size:{} cost: {}", bytes.length, stopWatchUtil.prettyPrint());

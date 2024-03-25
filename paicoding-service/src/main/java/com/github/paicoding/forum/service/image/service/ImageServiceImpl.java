@@ -3,6 +3,7 @@ package com.github.paicoding.forum.service.image.service;
 import com.github.hui.quick.plugin.base.constants.MediaType;
 import com.github.hui.quick.plugin.base.file.FileReadUtil;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
+import com.github.paicoding.forum.api.model.exception.ForumException;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.core.async.AsyncExecute;
 import com.github.paicoding.forum.core.async.AsyncUtil;
@@ -83,6 +84,9 @@ public class ImageServiceImpl implements ImageService {
             }
 
             return imageUploader.upload(file.getInputStream(), fileType);
+        } catch (ForumException fe) {
+            log.error("Image's rejected with auditing!");
+            throw fe;
         } catch (IOException e) {
             log.error("Parse img from httpRequest to BufferedImage error! e:", e);
             throw ExceptionUtil.of(StatusEnum.UPLOAD_PIC_FAILED);
