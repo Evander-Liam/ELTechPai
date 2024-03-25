@@ -1,9 +1,7 @@
 package com.github.paicoding.forum.service.image.oss;
 
 import com.aliyun.imageaudit20191230.Client;
-import com.aliyun.imageaudit20191230.models.ScanImageRequest;
-import com.aliyun.imageaudit20191230.models.ScanImageResponse;
-import com.aliyun.imageaudit20191230.models.ScanImageResponseBody;
+import com.aliyun.imageaudit20191230.models.*;
 import com.aliyun.teaopenapi.models.Config;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.github.paicoding.forum.core.config.ImageProperties;
@@ -13,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
 @Slf4j
 @ConditionalOnExpression(value = "#{'ali'.equals(environment.getProperty('image.oss.type'))}")
 @Component
-public class ImageAudit {
+public class ContextAudit {
     @Autowired
     private ImageProperties imageProperties;
     private static final String ENDPOINT = "imageaudit.cn-shanghai.aliyuncs.com";
@@ -43,6 +42,17 @@ public class ImageAudit {
      */
     public static String scanImage(String image) throws Exception {
         return Image.scanImage(image);
+    }
+
+    /**
+     * 检测文本内容是否违规
+     *
+     * @param text
+     * @return 若为空则合规，否则为为违规信息
+     * @throws Exception
+     */
+    public static String scanText(String text) {
+        return Text.scanText(text);
     }
 
     static class Image {
@@ -201,6 +211,79 @@ public class ImageAudit {
                 default:
                     return "未知错误。";
             }
+        }
+    }
+
+    static class Text {
+        private static final List<ScanTextRequest.ScanTextRequestLabels> labels;
+
+        static {
+            labels = new ArrayList<>();
+            for (String label : Arrays.asList("spam", "politics", "abuse", "terrorism", "porn", "flood", "contraband", "ad")) {
+                labels.add(new ScanTextRequest.ScanTextRequestLabels().setLabel(label));
+            }
+        }
+
+
+        public static String scanText(String text) {
+            ScanTextRequest.ScanTextRequestTasks tasks = new ScanTextRequest.ScanTextRequestTasks().setContent(text);
+
+            ScanTextRequest scanTextRequest = new ScanTextRequest().setLabels(labels).setTasks(Collections.singletonList(tasks));
+            RuntimeOptions runtime = new RuntimeOptions();
+            ScanTextResponse response;
+            try {
+                response = client.scanTextWithOptions(scanTextRequest, runtime);
+                ScanTextResponseBody.ScanTextResponseBodyDataElementsResults results = response.getBody().getData()
+                        .getElements().get(0).getResults().get(0);
+
+                if (!results.getSuggestion().equals("pass")) {
+                    return generateErrorMessage(results);
+                }
+            } catch (Exception e) {
+                log.error("Content Scanning Failure! {}", e.getMessage());
+                return "";
+            }
+
+            return "";
+        }
+
+        private static String generateErrorMessage(ScanTextResponseBody.ScanTextResponseBodyDataElementsResults results) {
+            StringBuilder errorMsg = new StringBuilder("Suggestion: " + results.getSuggestion() + ", Error Detail: ");
+
+            List<ScanTextResponseBody.ScanTextResponseBodyDataElementsResultsDetails> details = results.getDetails();
+            for (ScanTextResponseBody.ScanTextResponseBodyDataElementsResultsDetails detail : details) {
+                switch (detail.getLabel()) {
+                    case "spam":
+                        errorMsg.append("文本包含垃圾内容。");
+                        break;
+                    case "politics":
+                        errorMsg.append("文本包含敏感政治内容。");
+                        break;
+                    case "abuse":
+                        errorMsg.append("文本包含辱骂内容。");
+                        break;
+                    case "terrorism":
+                        errorMsg.append("文本包含恐怖主义内容。");
+                        break;
+                    case "porn":
+                        errorMsg.append("文本包含色情内容。");
+                        break;
+                    case "flood":
+                        errorMsg.append("文本包含灌水内容。");
+                        break;
+                    case "contraband":
+                        errorMsg.append("文本包含违禁内容。");
+                        break;
+                    case "ad":
+                        errorMsg.append("文本包含广告内容。");
+                        break;
+                    default:
+                        errorMsg.append("文本包含未知的不适当内容。");
+                        break;
+                }
+            }
+
+            return errorMsg.toString();
         }
     }
 }

@@ -4,6 +4,7 @@ import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.*;
 import com.github.paicoding.forum.api.model.event.ArticleMsgEvent;
 import com.github.paicoding.forum.api.model.exception.ExceptionUtil;
+import com.github.paicoding.forum.api.model.exception.ForumException;
 import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
 import com.github.paicoding.forum.api.model.vo.constants.StatusEnum;
 import com.github.paicoding.forum.api.model.vo.user.dto.BaseUserInfoDTO;
@@ -17,10 +18,12 @@ import com.github.paicoding.forum.service.article.repository.dao.ArticleTagDao;
 import com.github.paicoding.forum.service.article.repository.entity.ArticleDO;
 import com.github.paicoding.forum.service.article.service.ArticleWriteService;
 import com.github.paicoding.forum.service.article.service.ColumnSettingService;
+import com.github.paicoding.forum.service.image.oss.ContextAudit;
 import com.github.paicoding.forum.service.image.service.ImageService;
 import com.github.paicoding.forum.service.user.service.AuthorWhiteListService;
 import com.github.paicoding.forum.service.user.service.UserFootService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
@@ -76,6 +79,19 @@ public class ArticleWriteServiceImpl implements ArticleWriteService {
     public Long saveArticle(ArticlePostReq req, Long author) {
         ArticleDO article = ArticleConverter.toArticleDo(req, author);
         String content = imageService.mdImgReplace(req.getContent());
+
+        try {
+            String errorMsg = ContextAudit.scanText(content);
+            if (StringUtils.isNotBlank(errorMsg)) {
+                ForumException forumException = ExceptionUtil.of(StatusEnum.ARTICLE_CONTENT_VIOLATION);
+                forumException.getStatus().setMsg(errorMsg);
+                throw forumException;
+            }
+        }  catch (ForumException fe) {
+            log.error("Article's rejected with auditing! msg: {}", fe.getStatus().getMsg());
+            throw fe;
+        }
+
         return transactionTemplate.execute(new TransactionCallback<Long>() {
             @Override
             public Long doInTransaction(TransactionStatus status) {

@@ -4,6 +4,7 @@ import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.DocumentTypeEnum;
 import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
 import com.github.paicoding.forum.api.model.enums.OperateTypeEnum;
+import com.github.paicoding.forum.api.model.exception.ForumException;
 import com.github.paicoding.forum.api.model.vo.PageParam;
 import com.github.paicoding.forum.api.model.vo.ResVo;
 import com.github.paicoding.forum.api.model.vo.comment.CommentSaveReq;
@@ -24,6 +25,7 @@ import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
 import com.github.paicoding.forum.service.user.service.UserFootService;
 import com.github.paicoding.forum.web.component.TemplateEngineHelper;
 import com.github.paicoding.forum.web.front.article.vo.ArticleDetailVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +40,7 @@ import java.util.Optional;
  * @date : 2022/4/22 10:56
  **/
 @RestController
+@Slf4j
 @RequestMapping(path = "comment/api")
 public class CommentRestController {
     @Autowired
@@ -94,7 +97,13 @@ public class CommentRestController {
         // 保存评论
         req.setUserId(ReqInfoContext.getReqInfo().getUserId());
         req.setCommentContent(StringEscapeUtils.escapeHtml3(req.getCommentContent()));
-        commentWriteService.saveComment(req);
+
+        try {
+            commentWriteService.saveComment(req);
+        } catch (ForumException fe) {
+            log.error("Comment's rejected with auditing!");
+            return ResVo.fail(StatusEnum.COMMENT_CONTENT_VIOLATION);
+        }
 
         // 返回新的评论信息，用于实时更新详情也的评论列表
         ArticleDetailVo vo = new ArticleDetailVo();

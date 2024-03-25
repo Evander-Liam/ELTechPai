@@ -12,7 +12,7 @@ import com.github.paicoding.forum.core.autoconf.DynamicConfigContainer;
 import com.github.paicoding.forum.core.config.ImageProperties;
 import com.github.paicoding.forum.core.util.Md5Util;
 import com.github.paicoding.forum.core.util.StopWatchUtil;
-import com.github.paicoding.forum.service.image.oss.ImageAudit;
+import com.github.paicoding.forum.service.image.oss.ContextAudit;
 import com.github.paicoding.forum.service.image.oss.ImageUploader;
 import lombok.Getter;
 import lombok.Setter;
@@ -89,7 +89,7 @@ public class AliOssWrapper implements ImageUploader, InitializingBean, Disposabl
                         .append('/')
                         .append(fileName);
 
-                String errorMsg = stopWatchUtil.record("检测违规图片", () -> ImageAudit.scanImage(imageURL.toString()));
+                String errorMsg = stopWatchUtil.record("检测违规图片", () -> ContextAudit.scanImage(imageURL.toString()));
                 if (StringUtils.isNotBlank(errorMsg)) {
                     stopWatchUtil.record("删除违规图片", () -> ossClient.deleteObject(properties.getOss().getBucket(), fileName));
 

@@ -4,6 +4,7 @@ import com.github.paicoding.forum.api.model.context.ReqInfoContext;
 import com.github.paicoding.forum.api.model.enums.DocumentTypeEnum;
 import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
 import com.github.paicoding.forum.api.model.enums.OperateTypeEnum;
+import com.github.paicoding.forum.api.model.exception.ForumException;
 import com.github.paicoding.forum.api.model.vo.*;
 import com.github.paicoding.forum.api.model.vo.article.ArticlePostReq;
 import com.github.paicoding.forum.api.model.vo.article.ContentPostReq;
@@ -184,12 +185,19 @@ public class ArticleRestController {
     @PostMapping(path = "post")
     @MdcDot(bizCode = "#req.articleId")
     public ResVo<Long> post(@RequestBody ArticlePostReq req, HttpServletResponse response) throws IOException {
-        Long id = articleWriteService.saveArticle(req, ReqInfoContext.getReqInfo().getUserId());
-        // 如果使用后端重定向，可以使用下面两种策略
-//        return "redirect:/article/detail/" + id;
-//        response.sendRedirect("/article/detail/" + id);
-        // 这里采用前端重定向策略
-        return ResVo.ok(id);
+        try {
+            Long id = articleWriteService.saveArticle(req, ReqInfoContext.getReqInfo().getUserId());
+
+            // 如果使用后端重定向，可以使用下面两种策略
+            // return "redirect:/article/detail/" + id;
+            // response.sendRedirect("/article/detail/" + id);
+            // 这里采用前端重定向策略
+
+            return ResVo.ok(id);
+        } catch (ForumException fe) {
+            log.error("Article's rejected with auditing!");
+            return ResVo.fail(StatusEnum.ARTICLE_CONTENT_VIOLATION);
+        }
     }
 
 

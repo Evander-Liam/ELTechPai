@@ -45,12 +45,13 @@ public enum StatusEnum {
     UNEXPECT_ERROR(100_500_001, "非预期异常:%s"),
 
     // 图片相关异常类型
+    UPLOAD_CONTENT_VIOLATION(100_400_003, "图片内容违规！"),
     UPLOAD_PIC_FAILED(100_500_002, "图片上传失败！"),
-    UPLOAD_PIC_FAILED_IN_AUDITING(100_500_003, "图片内容违规！"),
 
     // --------------------------------
 
     // 文章相关异常类型，前缀为200
+    ARTICLE_CONTENT_VIOLATION(200_400_001, "文章内容违规！"),
     ARTICLE_NOT_EXISTS(200_404_001, "文章不存在:%s"),
     COLUMN_NOT_EXISTS(200_404_002, "教程不存在:%s"),
     COLUMN_QUERY_ERROR(200_500_003, "教程查询异常:%s"),
@@ -61,8 +62,8 @@ public enum StatusEnum {
     // --------------------------------
 
     // 评论相关异常类型
+    COMMENT_CONTENT_VIOLATION(300_400_001, "评论内容违规！"),
     COMMENT_NOT_EXISTS(300_404_001, "评论不存在:%s"),
-
 
     // --------------------------------
 
