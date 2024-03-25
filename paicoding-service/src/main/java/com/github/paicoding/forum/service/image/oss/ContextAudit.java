@@ -25,6 +25,10 @@ public class ContextAudit implements InitializingBean {
     private static final String ENDPOINT = "imageaudit.cn-shanghai.aliyuncs.com";
     private static Client client;
 
+    // 图片和文本审核内容
+    private static final List<String> imageScene = Arrays.asList("porn", "terrorism", "live", "logo");// "ad"
+    static List<String> textScene = Arrays.asList("spam", "politics", "abuse", "terrorism", "porn", "flood", "contraband");// "ad"
+
     @Override
     public void afterPropertiesSet() throws Exception {
         Config config = new Config().setAccessKeyId(imageProperties.getOss().getAk())
@@ -37,7 +41,7 @@ public class ContextAudit implements InitializingBean {
      * 检测图片内容是否违规
      *
      * @param image
-     * @return 若为空则合规，否则为为违规信息
+     * @return
      * @throws Exception
      */
     public static String scanImage(String image) throws Exception {
@@ -48,19 +52,16 @@ public class ContextAudit implements InitializingBean {
      * 检测文本内容是否违规
      *
      * @param text
-     * @return 若为空则合规，否则为为违规信息
-     * @throws Exception
+     * @return
      */
     public static String scanText(String text) {
         return Text.scanText(text);
     }
 
     static class Image {
-        private static final List<String> scene = Arrays.asList("porn", "terrorism", "ad", "live", "logo");
-
         public static String scanImage(String image) throws Exception {
             ScanImageRequest.ScanImageRequestTask task0 = new ScanImageRequest.ScanImageRequestTask().setImageURL(image);
-            ScanImageRequest scanImageRequest = new ScanImageRequest().setTask(Collections.singletonList(task0)).setScene(scene);
+            ScanImageRequest scanImageRequest = new ScanImageRequest().setTask(Collections.singletonList(task0)).setScene(imageScene);
 
             RuntimeOptions runtime = new RuntimeOptions();
             ScanImageResponse response = client.scanImageWithOptions(scanImageRequest, runtime);
@@ -219,7 +220,7 @@ public class ContextAudit implements InitializingBean {
 
         static {
             labels = new ArrayList<>();
-            for (String label : Arrays.asList("spam", "politics", "abuse", "terrorism", "porn", "flood", "contraband", "ad")) {
+            for (String label : textScene) {// "ad"
                 labels.add(new ScanTextRequest.ScanTextRequestLabels().setLabel(label));
             }
         }
