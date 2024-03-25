@@ -6,11 +6,11 @@ import com.aliyun.teaopenapi.models.Config;
 import com.aliyun.teautil.models.RuntimeOptions;
 import com.github.paicoding.forum.core.config.ImageProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,14 +19,14 @@ import java.util.List;
 @Slf4j
 @ConditionalOnExpression(value = "#{'ali'.equals(environment.getProperty('image.oss.type'))}")
 @Component
-public class ContextAudit {
+public class ContextAudit implements InitializingBean {
     @Autowired
     private ImageProperties imageProperties;
     private static final String ENDPOINT = "imageaudit.cn-shanghai.aliyuncs.com";
     private static Client client;
 
-    @PostConstruct
-    private void init() throws Exception {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         Config config = new Config().setAccessKeyId(imageProperties.getOss().getAk())
                 .setAccessKeySecret(imageProperties.getOss().getSk())
                 .setEndpoint(ENDPOINT);
