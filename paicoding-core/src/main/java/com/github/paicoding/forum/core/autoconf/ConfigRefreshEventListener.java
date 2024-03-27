@@ -1,5 +1,6 @@
 package com.github.paicoding.forum.core.autoconf;
 
+
 import com.github.paicoding.forum.api.model.event.ConfigRefreshEvent;
 import com.github.paicoding.forum.core.autoconf.property.SpringValueRegistry;
 import org.springframework.beans.factory.annotation.Autowired;

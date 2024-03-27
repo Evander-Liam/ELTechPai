@@ -2,7 +2,6 @@ package com.github.paicoding.forum.service.image.oss;
 
 import com.github.hui.quick.plugin.base.constants.MediaType;
 import com.github.hui.quick.plugin.base.file.FileReadUtil;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
@@ -50,7 +49,7 @@ public interface ImageUploader {
             return fileType;
         }
 
-        if (!(input instanceof ByteInputStream)) {
+        if (!(input instanceof ByteArrayInputStream)) {
             byte[] bytes = StreamUtils.copyToByteArray(input);
             input = new ByteArrayInputStream(bytes);
         }

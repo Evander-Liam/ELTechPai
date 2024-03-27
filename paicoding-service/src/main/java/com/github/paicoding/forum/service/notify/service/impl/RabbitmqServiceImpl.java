@@ -1,12 +1,14 @@
 package com.github.paicoding.forum.service.notify.service.impl;
 
 import com.github.paicoding.forum.api.model.enums.NotifyTypeEnum;
+import com.github.paicoding.forum.core.cache.RedisClient;
 import com.github.paicoding.forum.core.common.CommonConstants;
 import com.github.paicoding.forum.core.rabbitmq.RabbitmqUtil;
 import com.github.paicoding.forum.core.util.JsonUtil;
 import com.github.paicoding.forum.core.util.SpringUtil;
 import com.github.paicoding.forum.service.notify.service.NotifyService;
 import com.github.paicoding.forum.service.notify.service.RabbitmqService;
+import com.github.paicoding.forum.service.statistics.constants.CountConstants;
 import com.github.paicoding.forum.service.user.repository.entity.UserFootDO;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -63,6 +65,10 @@ public class RabbitmqServiceImpl implements RabbitmqService {
             // 获取Rabbitmq消息，并保存到DB
             UserFootDO userFootDO = JsonUtil.toObj(msg, UserFootDO.class);
             notifyService.saveArticleNotify(userFootDO, NotifyTypeEnum.PRAISE);
+
+            // 更新缓存
+            RedisClient.hIncr(CountConstants.USER_STATISTIC_INFO + userFootDO.getDocumentUserId(), CountConstants.PRAISE_COUNT, 1);
+            RedisClient.hIncr(CountConstants.ARTICLE_STATISTIC_INFO + userFootDO.getDocumentId(), CountConstants.PRAISE_COUNT, 1);
 
             // 手动确认消息
             channel.basicAck(deliveryTag, false);

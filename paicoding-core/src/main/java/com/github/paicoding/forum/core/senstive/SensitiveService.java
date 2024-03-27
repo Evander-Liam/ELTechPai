@@ -55,7 +55,7 @@ public class SensitiveService {
                 .wordDeny(deny)
                 .wordAllow(allow)
                 .init();
-        log.info("敏感词初始化完成!");
+        log.info("敏感词初始化完成！");
     }
 
     /**
